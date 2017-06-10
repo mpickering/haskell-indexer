@@ -8,6 +8,11 @@ if (($# < 2)); then
   exit 1
 fi
 
+# Figure out a path to the directory where this file resides.
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+. $DIR/scripts/common.sh
+
 # Directory where to build the index.
 export INDEXER_OUTPUT_DIR=$1
 mkdir -p "$INDEXER_OUTPUT_DIR"
@@ -20,18 +25,12 @@ project_root=$(cd "$(dirname "$0")"; pwd)
 
 # Build and index the packages
 # ============================
-# `stack build` does not rebuild packages if they have been registered in the
-# snapshot database (something like ~/.stack/snapshots/x86_64-linux/lts-8.17/8.0.2/pkgdb),
-# thus we unregister the packages first to force rebuilding.
-# Note: `ghc-pkg unregister` does not unregister dependencies, so dependencies
-# won't be reindexed unless explicitly specified in the command line.
-for i in "${@:2}"; do
-  stack exec -- ghc-pkg unregister --force "$i" || :
-done
-
 # Put stack wrapper ghc script, ghc-pkg (from compiler-bin) and
-# ghc_kythe_wrapper (from local-install-root, invoked by wrappers/stack/ghc) on the PATH.
-# $(stack path --compiler-bin) is also on the PATH to make --system-ghc pick it instead
-# of system ghc (e.g. /usr/bin/ghc).
-PATH="$project_root/wrappers/stack:$(stack path --compiler-bin):$PATH:$(stack path --local-install-root)/bin" \
-  stack --system-ghc build "${@:2}"
+# ghc_kythe_wrapper (from local-install-root) on the PATH. Note that stack
+# wrapper ghc script replaces the system ghc.
+PATH=$project_root/wrappers/stack:$(stack path --compiler-bin):$PATH:$(stack path --local-install-root)/bin \
+  stack --system-ghc build --no-nix --force-dirty ${@:2}
+[[ $? != 0 ]] && fail "Indexing failed!"
+
+# Serve the index
+serve_index
