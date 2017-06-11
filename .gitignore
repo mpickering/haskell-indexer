@@ -3,3 +3,7 @@
 **/tags
 **/TAGS
 *.swp
+*/dist/
+/dist-newstyle/
+/cabal.sandbox.config
+.cabal-sandbox/
