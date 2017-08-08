@@ -56,7 +56,6 @@ ghcToKythe globalLock ghcArgs analysisOptions baseVName sink =
             =$= chunksOf 1000)
             $$ sinkChunks
     --
-    sinkChunks :: Sink [Raw.Entry] IO ()
     sinkChunks = awaitForever (lift . sink)
 
 -- | Haskell sources are de-facto UTF-8, but GHC ignores bad bytes in comments.
