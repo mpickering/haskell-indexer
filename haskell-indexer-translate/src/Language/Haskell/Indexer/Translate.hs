@@ -236,7 +236,7 @@ data Relation = Relation
     }
     deriving (Eq, Show)
 
-data RelationKind = ImplementsMethod | InstantiatesClass
+data RelationKind = ImplementsMethod | InstantiatesClass | Generates Text -- Source of generation
     deriving (Eq, Ord, Show)
 
 -- | An unqualified id for the purpose of displaying to users.

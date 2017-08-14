@@ -195,12 +195,21 @@ makeAnchor mbSource anchorEdge targetVName mbSnippet mbRefContext = do
 -- | Makes fact about a non-reference edge.
 makeRelationFacts :: Relation -> Conversion [Raw.Entry]
 makeRelationFacts (Relation src relKind target) =
-    traverse (\k -> edge <$> tickVName src <*> pure k <*> tickVName target)
-             edgeKinds
+  case relKind of
+    Generates t ->
+      fmap (:[]) (edge <$> fmap (\e -> e {vnLanguage = t}) (tickVName src)
+                       <*> pure GeneratesE
+                       <*> tickVName target)
+    _ ->
+      traverse (\k -> edge <$> tickVName src
+                           <*> pure k
+                           <*> tickVName target)
+               edgeKinds
   where
     edgeKinds = case relKind of
          ImplementsMethod  -> [OverridesE, OverridesRootE]
          InstantiatesClass -> [ExtendsE]
+         Generates {}      -> [GeneratesE]
            -- Note: In Haskell-terms, class instantiation is not extension
            -- (or subclassing), but in Kythe terms we can think of the class
            -- as an interface, and the instance as the implementation.
@@ -234,7 +243,8 @@ makeSnippetFacts (OffsetRange s e) =
 -- The generated name uniquely identifies the given entitiy.
 tickVName :: Tick -> Conversion Raw.VName
 tickVName t = updateSig <$> asks baseVName
-  where updateSig v = v { vnSignature = tickString t }
+  where updateSig v = v { vnSignature = tickString t
+                        }
 
 -- | A non-implicit anchor VName.
 -- In theory the pure location is enough to construct it, but for practical

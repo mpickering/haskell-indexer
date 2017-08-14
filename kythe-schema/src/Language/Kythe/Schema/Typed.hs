@@ -166,6 +166,7 @@ data Edge
     | ExtendsE   -- ^ Note: Kythe allows emitting "extends/"-prefixed custom
                  --   edges. No need for that, yet.
     | AnchorEdgeE AnchorEdge
+    | GeneratesE
 
 -- | Edges running from anchor to semantic node.
 data AnchorEdge
@@ -173,7 +174,7 @@ data AnchorEdge
     | DefinesBindingE
     | RefE
     | RefCallE
-    | RefDocE    
+    | RefDocE
     | RefImportsE
 
 printEdge :: Edge -> Text
@@ -182,6 +183,7 @@ printEdge = \case
     OverridesE      -> "/kythe/edge/overrides"
     OverridesRootE  -> "/kythe/edge/overrides/root"
     ExtendsE        -> "/kythe/edge/extends"
+    GeneratesE      -> "/kythe/edge/generates"
     AnchorEdgeE e   -> case e of
         DefinesE        -> "/kythe/edge/defines"
         DefinesBindingE -> "/kythe/edge/defines/binding"
