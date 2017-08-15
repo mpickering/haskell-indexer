@@ -197,7 +197,7 @@ makeRelationFacts :: Relation -> Conversion [Raw.Entry]
 makeRelationFacts (Relation src relKind target) =
   case relKind of
     Generates t ->
-      fmap (:[]) (edge <$> fmap (\e -> e {vnLanguage = t, vnCorpus = ""}) (tickVName src)
+      fmap (:[]) (edge <$> fmap (\e -> e {vnLanguage = t}) (tickVName src)
                        <*> pure GeneratesE
                        <*> tickVName target)
     _ ->
